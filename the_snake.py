@@ -20,6 +20,7 @@ BOARD_BACKGROUND_COLOR = (0, 0, 0)
 BORDER_COLOR = (93, 216, 228)
 APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
+WHITE_COLOR = (255, 255, 255)
 
 # Скорость движения змейки:
 SPEED = 20
@@ -37,7 +38,7 @@ clock = pg.time.Clock()
 class GameObject:
     """Базовый класс для игровых объектов."""
 
-    def __init__(self, body_color=(255, 255, 255)):
+    def __init__(self, body_color=WHITE_COLOR):
         """Создает игровой объект с заданным цветом."""
         self.position = CENTER_POSITION
         self.body_color = body_color
@@ -66,18 +67,11 @@ class Apple(GameObject):
 
     def randomize_position(self, bad_positions):
         """Задает яблоку случайную позицию на игровом поле."""
-        max_x_cells = GRID_WIDTH
-        max_y_cells = GRID_HEIGHT
-
-        while True:
-            rand_x_index = randint(0, max_x_cells - 1)
-            rand_y_index = randint(0, max_y_cells - 1)
-            new_x = rand_x_index * GRID_SIZE
-            new_y = rand_y_index * GRID_SIZE
-            self.position = (new_x, new_y)
-
-            if self.position not in bad_positions:
-                break
+        while self.position in bad_positions:
+            self.position = (
+                randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                randint(0, GRID_HEIGHT - 1) * GRID_SIZE
+            )
 
     def draw(self):
         """Отрисовывает яблоко на игровом поле."""
@@ -123,7 +117,7 @@ class Snake(GameObject):
             rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, rect)
 
-        self.draw_cell(self.positions[0])
+        self.draw_cell(self.get_head_position())
 
     def update_direction(self):
         """Обновляет направление движения змейки."""
@@ -137,6 +131,7 @@ class Snake(GameObject):
         self.positions = [self.position]
         self.direction = choice([UP, DOWN, LEFT, RIGHT])
         self.next_direction = None
+        self.last = None
 
 
 def handle_keys(game_object):
